@@ -6,7 +6,16 @@ import {
 } from '../../shared/types';
 import { GraphQLClientAdapter, AdapterConfig } from './types';
 import { ApolloLink, Observable, gql, ApolloClient as ApolloClientType, Operation, FetchResult } from '@apollo/client';
-import { getIntrospectionQuery, buildClientSchema } from 'graphql';
+import { 
+    getIntrospectionQuery, 
+    buildClientSchema,
+    isObjectType,
+    isInterfaceType,
+    isUnionType,
+    isEnumType,
+    isInputObjectType,
+    isScalarType,
+} from 'graphql';
 
 // Type alias for Apollo Client
 type ApolloClient = ApolloClientType<any>;
@@ -207,6 +216,75 @@ export class ApolloClientAdapter implements GraphQLClientAdapter {
                 }));
             };
 
+            // Extract all types from schema
+            const typeMap = schema.getTypeMap();
+            const allTypes = Object.values(typeMap)
+                .filter((type: any) => {
+                    // Filter out built-in types (starting with __)
+                    return !type.name.startsWith('__');
+                })
+                .map((type: any) => {
+                    // Determine type kind using GraphQL type guards
+                    let kind: 'OBJECT' | 'INTERFACE' | 'UNION' | 'ENUM' | 'INPUT_OBJECT' | 'SCALAR' = 'OBJECT';
+                    if (isScalarType(type)) {
+                        kind = 'SCALAR';
+                    } else if (isEnumType(type)) {
+                        kind = 'ENUM';
+                    } else if (isInputObjectType(type)) {
+                        kind = 'INPUT_OBJECT';
+                    } else if (isInterfaceType(type)) {
+                        kind = 'INTERFACE';
+                    } else if (isUnionType(type)) {
+                        kind = 'UNION';
+                    } else if (isObjectType(type)) {
+                        kind = 'OBJECT';
+                    }
+
+                    const typeObj: any = {
+                        name: type.name,
+                        kind,
+                        description: type.description,
+                    };
+
+                    // Add fields for object and interface types
+                    if ((isObjectType(type) || isInterfaceType(type) || isInputObjectType(type)) && type.getFields) {
+                        try {
+                            typeObj.fields = convertFields(type.getFields());
+                        } catch (e) {
+                            // Some types might not have fields
+                        }
+                    }
+
+                    // Add enum values
+                    if (isEnumType(type) && type.getValues) {
+                        try {
+                            typeObj.enumValues = type.getValues().map((v: any) => v.name);
+                        } catch (e) {
+                            // Error getting enum values
+                        }
+                    }
+
+                    // Add interfaces (for object types)
+                    if (isObjectType(type) && type.getInterfaces) {
+                        try {
+                            typeObj.interfaces = type.getInterfaces().map((i: any) => i.name);
+                        } catch (e) {
+                            // No interfaces
+                        }
+                    }
+
+                    // Add possible types for unions/interfaces
+                    if ((isUnionType(type) || isInterfaceType(type)) && schema.getPossibleTypes) {
+                        try {
+                            typeObj.possibleTypes = schema.getPossibleTypes(type).map((t: any) => t.name);
+                        } catch (e) {
+                            // No possible types
+                        }
+                    }
+
+                    return typeObj;
+                });
+
             return {
                 queryType: queryType ? {
                     name: queryType.name,
@@ -226,7 +304,7 @@ export class ApolloClientAdapter implements GraphQLClientAdapter {
                     fields: convertFields(subscriptionType.getFields()),
                     description: subscriptionType.description,
                 } : undefined,
-                types: [],
+                types: allTypes,
             };
         } catch (error) {
             console.error('[Apollo Adapter] Failed to fetch schema:', error);
