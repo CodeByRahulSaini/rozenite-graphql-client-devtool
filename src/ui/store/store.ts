@@ -18,6 +18,12 @@ export interface GraphQLDevToolsState {
   cacheEntries: Map<string, CacheEntry>;
   schema: GraphQLSchema | null;
   selectedTab: 'operations' | 'cache' | 'explorer';
+  autoSync: {
+    enabled: boolean;
+    durationMinutes: number | null;
+    endTime: number | null;
+    intervalId: ReturnType<typeof setInterval> | null;
+  };
 
   // Internal state
   _unsubscribeFunctions?: Array<{ remove: () => void }>;
@@ -31,6 +37,8 @@ export interface GraphQLDevToolsState {
     setSelectedTab: (tab: 'operations' | 'cache' | 'explorer') => void;
     requestCacheSnapshot: () => void;
     requestSchema: () => void;
+    startAutoSync: (durationMinutes: number) => void;
+    stopAutoSync: () => void;
   };
 
   // Event handling
@@ -55,6 +63,12 @@ export const createGraphQLDevToolsStore = () =>
     cacheEntries: new Map(),
     schema: null,
     selectedTab: 'operations',
+    autoSync: {
+      enabled: false,
+      durationMinutes: null,
+      endTime: null,
+      intervalId: null,
+    },
 
     // Actions
     actions: {
@@ -95,6 +109,58 @@ export const createGraphQLDevToolsStore = () =>
         if (_client) {
           _client.send('get-schema', {});
         }
+      },
+
+      startAutoSync: (durationMinutes: number) => {
+        const { autoSync, actions } = get();
+
+        // Stop existing sync if any
+        if (autoSync.intervalId) {
+          clearInterval(autoSync.intervalId);
+        }
+
+        const endTime = Date.now() + durationMinutes * 60 * 1000;
+
+        // Poll every 2.5 seconds
+        const intervalId = setInterval(() => {
+          const now = Date.now();
+          const currentState = get();
+          
+          if (now >= currentState.autoSync.endTime!) {
+            actions.stopAutoSync();
+          } else {
+            actions.requestCacheSnapshot();
+          }
+        }, 2500);
+
+        set({
+          autoSync: {
+            enabled: true,
+            durationMinutes,
+            endTime,
+            intervalId,
+          },
+        });
+
+        // Immediate fetch
+        actions.requestCacheSnapshot();
+      },
+
+      stopAutoSync: () => {
+        const { autoSync } = get();
+
+        if (autoSync.intervalId) {
+          clearInterval(autoSync.intervalId);
+        }
+
+        set({
+          autoSync: {
+            enabled: false,
+            durationMinutes: null,
+            endTime: null,
+            intervalId: null,
+          },
+        });
       },
     },
 
@@ -261,7 +327,12 @@ export const createGraphQLDevToolsStore = () =>
       },
 
       cleanupClient: () => {
-        const { _unsubscribeFunctions, _client } = get();
+        const { _unsubscribeFunctions, _client, autoSync, actions } = get();
+
+        // Stop auto-sync if active
+        if (autoSync.intervalId) {
+          actions.stopAutoSync();
+        }
 
         if (_unsubscribeFunctions) {
           _unsubscribeFunctions.forEach((unsubscribe) => unsubscribe.remove());

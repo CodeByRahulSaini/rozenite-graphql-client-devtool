@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { RefreshCw, Search } from 'lucide-react';
-import { useCacheEntries, useActions } from '../store/hooks';
+import { RefreshCw, Search, Clock } from 'lucide-react';
+import { useCacheEntries, useActions, useAutoSync } from '../store/hooks';
 import { ScrollArea } from '../components/ScrollArea';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
@@ -10,16 +10,59 @@ import { CacheEntry } from '../../shared/types';
 
 export function CacheTab() {
   const cacheEntries = useCacheEntries();
-  const { requestCacheSnapshot } = useActions();
+  const autoSync = useAutoSync();
+  const { requestCacheSnapshot, startAutoSync, stopAutoSync } = useActions();
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedEntry, setSelectedEntry] = useState<CacheEntry | null>(null);
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [groupByType, setGroupByType] = useState(true);
+  const [timeRemaining, setTimeRemaining] = useState<string>('');
+
+  // Get the current selected entry from cache (always fresh data)
+  const selectedEntry = selectedEntryId ? cacheEntries.get(selectedEntryId) || null : null;
 
   useEffect(() => {
     // Request initial cache snapshot when tab is mounted
     requestCacheSnapshot();
   }, [requestCacheSnapshot]);
+
+  // Update timer display every second
+  useEffect(() => {
+    if (!autoSync.enabled || !autoSync.endTime) {
+      setTimeRemaining('');
+      return;
+    }
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const remaining = Math.max(0, autoSync.endTime! - now);
+      
+      if (remaining === 0) {
+        setTimeRemaining('');
+        return;
+      }
+
+      const minutes = Math.floor(remaining / 60000);
+      const seconds = Math.floor((remaining % 60000) / 1000);
+      setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+  }, [autoSync.enabled, autoSync.endTime]);
+
+  const handleAutoSyncChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    
+    if (value === 'off') {
+      stopAutoSync();
+    } else {
+      const minutes = parseInt(value, 10);
+      startAutoSync(minutes);
+    }
+  };
 
   // Convert cache entries Map to array and apply filters
   const entriesArray = Array.from(cacheEntries.values());
@@ -68,6 +111,30 @@ export function CacheTab() {
           />
           Group by Type
         </label>
+        
+        {/* Auto-sync dropdown */}
+        <div className="flex items-center gap-2">
+          <Clock className="h-3 w-3 text-gray-400" />
+          <select
+            value={autoSync.enabled ? autoSync.durationMinutes?.toString() : 'off'}
+            onChange={handleAutoSyncChange}
+            className="h-8 px-2 text-xs bg-gray-700 border border-gray-600 rounded text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="off">Auto-sync: Off</option>
+            <option value="5">5 minutes</option>
+            <option value="10">10 minutes</option>
+            <option value="30">30 minutes</option>
+          </select>
+        </div>
+
+        {/* Timer display */}
+        {autoSync.enabled && timeRemaining && (
+          <span className="flex items-center gap-1 text-xs text-green-400 font-medium">
+            <RefreshCw className="h-3 w-3 animate-spin" />
+            {timeRemaining}
+          </span>
+        )}
+        
         <Button
           variant="outline"
           size="sm"
@@ -129,7 +196,7 @@ export function CacheTab() {
                               ? 'bg-gray-800 border-l-2 border-blue-500'
                               : ''
                           }`}
-                          onClick={() => setSelectedEntry(entry)}
+                          onClick={() => setSelectedEntryId(entry.id)}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">

@@ -31,6 +31,9 @@ export const useHasSelectedOperation = () => {
   return selectedId !== null;
 };
 
+export const useAutoSync = () =>
+  useStore(store, (state) => state.autoSync);
+
 // Actions
 export const useActions = () =>
   useStore(store, (state) => state.actions);
