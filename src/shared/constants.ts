@@ -1,1 +1,1 @@
-export const pluginId = '@rozenite/apollo-client-devtools';
+export const pluginId = '@rozenite/graphql-client-devtool';

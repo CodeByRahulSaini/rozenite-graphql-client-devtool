@@ -2,3 +2,4 @@ dist
 apollo-client-devtools
 node_modules
 .DS_Store
+guidelines.md

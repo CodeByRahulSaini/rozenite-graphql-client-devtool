@@ -1,7 +1,7 @@
 {
   "name": "rozenite-graphql-client-devtool",
   "version": "0.0.1",
-  "description": "-",
+  "description": "GraphQL Client DevTools plugin for Rozenite - Debug Apollo Client, urql and other GraphQL clients in React Native",
   "type": "module",
   "main": "./dist/react-native.cjs",
   "module": "./dist/react-native.js",
@@ -11,7 +11,9 @@
     "dev": "rozenite dev"
   },
   "dependencies": {
-    "@rozenite/plugin-bridge": "1.0.0-alpha.3"
+    "@rozenite/plugin-bridge": "1.0.0-alpha.3",
+    "@apollo/client": "^3.8.0",
+    "graphql": "^16.8.0"
   },
   "devDependencies": {
     "vite": "^6.0.0",
@@ -22,11 +24,33 @@
     "react": "18.3.1",
     "react-dom": "18.3.0",
     "react-native": "0.76.0",
-    "@types/react": "~18.3.12"
+    "@types/react": "~18.3.12",
+    "@radix-ui/react-tabs": "^1.1.12",
+    "@radix-ui/react-scroll-area": "^1.2.9",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@tanstack/react-table": "^8.21.3",
+    "tailwindcss": "^3.4.17",
+    "postcss": "^8.5.6",
+    "autoprefixer": "^10.4.21",
+    "tailwindcss-animate": "^1.0.7",
+    "lucide-react": "^0.263.1",
+    "zustand": "^5.0.6",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1",
+    "react-json-tree": "^0.20.0",
+    "@types/react-dom": "~18.3.1"
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "urql": "*"
+  },
+  "peerDependenciesMeta": {
+    "urql": {
+      "optional": true
+    }
   },
   "license": "MIT"
 }
