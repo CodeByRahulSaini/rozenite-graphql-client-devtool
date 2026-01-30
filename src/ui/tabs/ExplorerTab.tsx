@@ -359,11 +359,6 @@ export function ExplorerTab() {
     const outputSignature = generateExpandedOutputSignature(field);
     const queryFormat = generateQueryFormat(field);
     
-    // Debug: Check if types exist in schema
-    const outputTypeName = extractTypeName(field.type);
-    const outputType = findType(outputTypeName);
-    const availableTypes = schema?.types.map(t => t.name) || [];
-    
     const colorClass = operationType === 'Query' 
       ? 'text-blue-400' 
       : operationType === 'Mutation' 
@@ -549,41 +544,6 @@ export function ExplorerTab() {
               : '💡 Ready to copy into your GraphQL query'
             }
           </div>
-          
-          {/* Debug Info */}
-          <details className="mt-3">
-            <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-400">
-              🐛 Debug Info
-            </summary>
-            <div className="mt-2 p-3 bg-gray-800 rounded border border-gray-700 text-xs">
-              <div className="mb-2">
-                <strong className="text-yellow-400">Raw Type String:</strong>
-                <div className="font-mono text-gray-300 mt-1">{field.type}</div>
-              </div>
-              <div className="mb-2">
-                <strong className="text-yellow-400">Extracted Type Name:</strong>
-                <div className="font-mono text-gray-300 mt-1">{outputTypeName}</div>
-              </div>
-              <div className="mb-2">
-                <strong className="text-yellow-400">Type Found in Schema:</strong>
-                <div className="font-mono text-gray-300 mt-1">
-                  {outputType ? `Yes - Kind: ${outputType.kind}, Fields: ${outputType.fields?.length || 0}` : 'No'}
-                </div>
-              </div>
-              {outputType && outputType.fields && (
-                <div className="mb-2">
-                  <strong className="text-yellow-400">Type Fields:</strong>
-                  <div className="font-mono text-gray-300 mt-1 max-h-40 overflow-y-auto">
-                    {outputType.fields.map(f => `${f.name}: ${f.type}`).join('\n')}
-                  </div>
-                </div>
-              )}
-              <div>
-                <strong className="text-yellow-400">Available Types Count:</strong>
-                <div className="font-mono text-gray-300 mt-1">{availableTypes.length} types in schema</div>
-              </div>
-            </div>
-          </details>
         </div>
       </div>
     );

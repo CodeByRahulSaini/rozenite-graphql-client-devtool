@@ -47,6 +47,9 @@ interface UseGraphqlClientDevtoolConfig {
 /**
  * Main hook for integrating GraphQL client with Rozenite DevTools.
  * 
+ * This hook automatically tracks all GraphQL operations (queries, mutations, subscriptions)
+ * including duplicate queries that might be deduplicated by your GraphQL client.
+ * 
  * @example
  * ```typescript
  * // With Apollo Client
@@ -198,7 +201,6 @@ export const useGraphqlClientDevtool = (config: UseGraphqlClientDevtoolConfig) =
             // Handle clear operations
             pluginClient.onMessage('clear-operations', () => {
                 // Operations are managed by the panel, so nothing to do here
-                console.log('[GraphQL DevTools] Operations cleared');
             }),
         ];
 
