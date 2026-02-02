@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import { useOperations, useActions, useSelectedOperationId } from '../store/hooks';
+import {
+  useOperations,
+  useActions,
+  useSelectedOperationId,
+} from '../store/hooks';
 import { OperationsList } from './OperationsList';
 import { OperationDetailPanel } from './OperationDetailPanel';
 import { FilterBar, FilterState } from '../components/FilterBar';
-import { GraphQLOperation, OperationType } from '../../shared/types';
+import { OperationType } from '../../shared/types';
 
 export function OperationsTab() {
   const operations = useOperations();
   const selectedOperationId = useSelectedOperationId();
-  const { setSelectedOperation } = useActions();
+  const { setSelectedOperation, clearOperations } = useActions();
 
   const [filter, setFilter] = useState<FilterState>({
     text: '',
@@ -41,7 +45,11 @@ export function OperationsTab() {
 
   return (
     <div className="flex flex-col h-full">
-      <FilterBar filter={filter} onFilterChange={setFilter} />
+      <FilterBar
+        filter={filter}
+        onFilterChange={setFilter}
+        onClear={clearOperations}
+      />
       <div className="flex flex-1 overflow-hidden">
         {/* Operations List */}
         <div
@@ -64,4 +72,3 @@ export function OperationsTab() {
     </div>
   );
 }
-

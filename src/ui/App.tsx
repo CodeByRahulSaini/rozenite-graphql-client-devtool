@@ -47,7 +47,6 @@ export default function GraphQLDevToolsPanel() {
       <Toolbar
         isRecording={isRecording}
         onToggleRecording={handleToggleRecording}
-        onClear={clearOperations}
       />
 
       <Tabs defaultValue="operations" className="flex-1 flex flex-col min-h-0">

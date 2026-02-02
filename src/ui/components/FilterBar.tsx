@@ -1,5 +1,6 @@
-import { Search } from 'lucide-react';
+import { Search, Trash2 } from 'lucide-react';
 import { Input } from './Input';
+import { Button } from './Button';
 
 export type OperationType = 'query' | 'mutation' | 'subscription';
 
@@ -11,9 +12,10 @@ export interface FilterState {
 interface FilterBarProps {
   filter: FilterState;
   onFilterChange: (filter: FilterState) => void;
+  onClear?: () => void;
 }
 
-export function FilterBar({ filter, onFilterChange }: FilterBarProps) {
+export function FilterBar({ filter, onFilterChange, onClear }: FilterBarProps) {
   const handleTypeToggle = (type: OperationType) => {
     const newTypes = new Set(filter.types);
     if (newTypes.has(type)) {
@@ -32,9 +34,7 @@ export function FilterBar({ filter, onFilterChange }: FilterBarProps) {
           type="text"
           placeholder="Search operations..."
           value={filter.text}
-          onChange={(e) =>
-            onFilterChange({ ...filter, text: e.target.value })
-          }
+          onChange={(e) => onFilterChange({ ...filter, text: e.target.value })}
           className="h-8 pl-8 text-sm bg-gray-700 border-gray-600"
         />
       </div>
@@ -67,7 +67,18 @@ export function FilterBar({ filter, onFilterChange }: FilterBarProps) {
           Subscription
         </label>
       </div>
+      {onClear && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onClear}
+          className="h-8 px-2"
+          title="Clear all operations"
+        >
+          <Trash2 className="h-3 w-3 mr-1" />
+          Clear
+        </Button>
+      )}
     </div>
   );
 }
-
