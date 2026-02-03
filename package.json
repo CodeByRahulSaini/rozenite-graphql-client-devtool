@@ -1,18 +1,47 @@
 {
   "name": "rozenite-graphql-client-devtool",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "GraphQL Client DevTools plugin for Rozenite - Debug Apollo Client, urql and other GraphQL clients in React Native",
   "type": "module",
   "main": "./dist/react-native.cjs",
   "module": "./dist/react-native.js",
   "types": "./dist/react-native.d.ts",
+  "bundleDependencies": [],
+  "files": [
+    "dist",
+    "react-native.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "rozenite",
+    "graphql",
+    "devtools",
+    "react-native",
+    "apollo-client",
+    "urql",
+    "debugging",
+    "developer-tools",
+    "graphql-client",
+    "cache-inspector",
+    "schema-explorer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CodeByRahulSaini/rozenite-graphql-client-devtool.git"
+  },
+  "homepage": "https://github.com/CodeByRahulSaini/rozenite-graphql-client-devtool.git#readme",
+  "bugs": {
+    "url": "https://github.com/CodeByRahulSaini/rozenite-graphql-client-devtool/issues"
+  },
+  "author": "Rahul Saini",
   "scripts": {
     "build": "rozenite build",
-    "dev": "rozenite dev"
+    "dev": "rozenite dev",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@rozenite/plugin-bridge": "1.0.0-alpha.3",
-    "@apollo/client": "^3.8.0",
+    "@rozenite/plugin-bridge": "1.2.0",
     "graphql": "^16.8.0"
   },
   "devDependencies": {
@@ -40,14 +69,17 @@
     "clsx": "^2.1.1",
     "tailwind-merge": "^3.3.1",
     "react-json-tree": "^0.20.0",
-    "@types/react-dom": "~18.3.1"
+    "@types/react-dom": "~18.3.1",
+    "@apollo/client": "^3.8.0"
   },
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*",
-    "urql": "*"
+    "react": ">=18.0.0",
+    "react-native": ">=0.76.0"
   },
   "peerDependenciesMeta": {
+    "@apollo/client": {
+      "optional": true
+    },
     "urql": {
       "optional": true
     }
