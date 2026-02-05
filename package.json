@@ -1,7 +1,7 @@
 {
   "name": "rozenite-graphql-client-devtool",
   "version": "0.0.5",
-  "description": "GraphQL Client DevTools plugin for Rozenite - Debug Apollo Client, urql and other GraphQL clients in React Native",
+  "description": "GraphQL Client DevTools plugin for Rozenite - Debug Apollo Client and other GraphQL clients in React Native",
   "type": "module",
   "main": "./dist/react-native.cjs",
   "module": "./dist/react-native.js",
@@ -19,7 +19,6 @@
     "devtools",
     "react-native",
     "apollo-client",
-    "urql",
     "debugging",
     "developer-tools",
     "graphql-client",
@@ -78,9 +77,6 @@
   },
   "peerDependenciesMeta": {
     "@apollo/client": {
-      "optional": true
-    },
-    "urql": {
       "optional": true
     }
   },

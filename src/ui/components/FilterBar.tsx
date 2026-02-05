@@ -1,8 +1,7 @@
 import { Search, Trash2 } from 'lucide-react';
 import { Input } from './Input';
 import { Button } from './Button';
-
-export type OperationType = 'query' | 'mutation' | 'subscription';
+import type { OperationType } from '../../shared/types';
 
 export interface FilterState {
   text: string;

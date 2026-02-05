@@ -125,7 +125,7 @@ export const createGraphQLDevToolsStore = () =>
         const intervalId = setInterval(() => {
           const now = Date.now();
           const currentState = get();
-          
+
           if (now >= currentState.autoSync.endTime!) {
             actions.stopAutoSync();
           } else {
@@ -174,6 +174,17 @@ export const createGraphQLDevToolsStore = () =>
           const eventData = data as GraphQLDevToolEventMap['operation-start'];
           set((state) => {
             const newOperations = new Map(state.operations);
+
+            // Enforce operation limit (default 1000)
+            const maxOperations = 1000;
+            if (newOperations.size >= maxOperations) {
+              // Remove oldest operation (first entry in the Map)
+              const firstKey = newOperations.keys().next().value;
+              if (firstKey) {
+                newOperations.delete(firstKey);
+              }
+            }
+
             newOperations.set(eventData.operation.id, eventData.operation);
             return { operations: newOperations };
           });

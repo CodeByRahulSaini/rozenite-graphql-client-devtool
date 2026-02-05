@@ -64,5 +64,10 @@ export interface AdapterConfig {
    * Maximum number of operations to keep in memory
    */
   maxOperations?: number;
+
+  /**
+   * Polling interval in milliseconds for tracking operations (default: 500)
+   */
+  pollInterval?: number;
 }
 

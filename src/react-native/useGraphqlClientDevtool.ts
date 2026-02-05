@@ -4,10 +4,9 @@ import { pluginId } from '../shared/constants';
 import { GraphQLDevToolEventMap } from '../shared/events';
 import { GraphQLClientAdapter } from './adapters/types';
 import { ApolloClientAdapter } from './adapters/apollo-adapter';
-import { UrqlClientAdapter } from './adapters/urql-adapter';
 // Type aliases for GraphQL clients (optional dependencies - will be 'any' until installed)
 
-type SupportedClientType = 'apollo' | 'urql' | 'custom';
+type SupportedClientType = 'apollo' | 'custom';
 
 interface UseGraphqlClientDevtoolConfig {
     /**
@@ -106,8 +105,6 @@ export const useGraphqlClientDevtool = (config: UseGraphqlClientDevtoolConfig) =
             adapter = customAdapter;
         } else if (clientType === 'apollo') {
             adapter = new ApolloClientAdapter(client, { includeVariables, includeResponseData });
-        } else if (clientType === 'urql') {
-            adapter = new UrqlClientAdapter(client, { includeVariables, includeResponseData });
         } else {
             console.error(`[GraphQL DevTools] Unsupported client type: ${clientType}`);
             return;
@@ -118,19 +115,28 @@ export const useGraphqlClientDevtool = (config: UseGraphqlClientDevtoolConfig) =
 
         // Set up operation tracking
         const unsubscribeOperation = adapter.onOperation((operation) => {
-            if (!isRecordingRef.current) return;
+            // Only gate loading events with recording state to prevent orphaned operations
+            // Always process completion/error events to avoid stuck loading states
+            if (!isRecordingRef.current && (operation.status === 'loading' || !operation.status)) {
+                return;
+            }
 
-            pluginClient.send('operation-start', { operation });
+            if (operation.status === 'loading' || !operation.status) {
+                pluginClient.send('operation-start', { operation });
+            }
 
-            // If operation already has data/error, send completion event
-            if (operation.status === 'success' && operation.data) {
+            console.log('[GraphQL DevTools] Tracked operation:', operation.id, operation.status);
+
+            // Handle completed operations
+            // Note: Don't check for truthy data/error values - they can be null, undefined, false, 0, etc.
+            if (operation.status === 'success') {
                 pluginClient.send('operation-complete', {
                     id: operation.id,
                     data: operation.data,
                     duration: operation.duration || 0,
                     fromCache: operation.fromCache,
                 });
-            } else if (operation.status === 'error' && operation.error) {
+            } else if (operation.status === 'error') {
                 pluginClient.send('operation-error', {
                     id: operation.id,
                     error: operation.error,
