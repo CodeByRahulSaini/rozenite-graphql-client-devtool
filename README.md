@@ -25,9 +25,17 @@ The Rozenite GraphQL Client DevTool provides a comprehensive debugging interface
 - 🔍 **Real-time Operation Tracking** - Monitor all GraphQL queries, mutations, and subscriptions as they happen
 - 📊 **Cache Inspector** - Browse and explore your GraphQL client's cache entries
 - 🗺️ **Schema Explorer** - Navigate through your GraphQL schema with detailed type information
-- 🔌 **Multi-Client Support** - Built-in adapters for Apollo Client and urql, with support for custom adapters
+- 🔌 **Multi-Client Support** - Built-in adapters for Apollo Client, with support for custom adapters
 - 🎯 **Filtering & Search** - Powerful filtering and search capabilities across all tabs
 - 📝 **Detailed Inspection** - View query text, variables, response data, errors, and timing information
+
+### Supported GraphQL Client
+
+- ⚡ **Apollo**
+
+#### Coming Soon
+- ⚡ **URQL**  
+- ⚡ **Relay** 
 
 ---
 
@@ -44,35 +52,19 @@ yarn add rozenite-graphql-client-devtool
 pnpm add rozenite-graphql-client-devtool
 ```
 
-### Peer Dependencies
-
-This plugin requires the following peer dependencies:
-
-```json
-{
-  "react": "*",
-  "react-native": "*"
-}
-```
+ 
 
 For Apollo Client support:
 ```bash
 npm install @apollo/client graphql
 ```
 
-For urql support:
-```bash
-npm install urql graphql
-```
-
 ---
 
 ## 🚀 Quick Start
 
-### With Apollo Client
-
 ```typescript
-import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import { useGraphqlClientDevtool } from 'rozenite-graphql-client-devtool';
 
 // Create your Apollo Client
@@ -96,32 +88,6 @@ function App() {
 }
 ```
 
-### With urql
-
-```typescript
-import { createClient } from 'urql';
-import { useGraphqlClientDevtool } from 'rozenite-graphql-client-devtool';
-
-// Create your urql client
-const client = createClient({
-  url: 'https://api.example.com/graphql',
-});
-
-function App() {
-  // Initialize the devtool
-  useGraphqlClientDevtool({
-    client,
-    clientType: 'urql',
-  });
-
-  return (
-    <Provider value={client}>
-      {/* Your app components */}
-    </Provider>
-  );
-}
-```
-
 ---
 
 ## 🔧 Configuration
@@ -136,12 +102,11 @@ The main hook for integrating your GraphQL client with Rozenite DevTools.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `client` | `any` | **required** | Your GraphQL client instance (Apollo Client, urql, etc.) |
-| `clientType` | `'apollo' \| 'urql' \| 'custom'` | **required** | The type of GraphQL client |
+| `client` | `any` | **required** | Your GraphQL client instance (Apollo Client or custom) |
+| `clientType` | `'apollo' \| 'custom'` | **required** | The type of GraphQL client |
 | `adapter` | `GraphQLClientAdapter` | `undefined` | Custom adapter implementation (required if `clientType` is `'custom'`) |
 | `includeVariables` | `boolean` | `true` | Whether to include variables in operation tracking |
 | `includeResponseData` | `boolean` | `true` | Whether to include response data in operation tracking |
-| `enabled` | `boolean` | `true` | Whether the devtool is enabled |
 
 ##### Example with Options
 
@@ -151,7 +116,6 @@ useGraphqlClientDevtool({
   clientType: 'apollo',
   includeVariables: true,
   includeResponseData: true,
-  enabled: __DEV__, // Only enable in development
 });
 ```
 
@@ -212,7 +176,7 @@ Browse your GraphQL schema and available operations.
 
 ## 🔌 Custom Adapters
 
-If you're using a GraphQL client that isn't Apollo or urql, you can create a custom adapter.
+If you're using a GraphQL client that isn't Apollo, you can create a custom adapter.
 
 ### Creating a Custom Adapter
 
@@ -306,56 +270,7 @@ interface GraphQLClientAdapter {
   clearCache?(): Promise<void>;
 }
 ```
-
----
-
-## 🎨 UI Components
-
-The devtool uses a modern, dark-themed UI built with:
-
-- **Radix UI** - Accessible, unstyled component primitives
-- **Tailwind CSS** - Utility-first CSS framework
-- **Lucide React** - Beautiful icon library
-- **React JSON Tree** - Interactive JSON viewer
-- **TanStack Table** - Powerful table component
-- **Zustand** - State management
-
----
-
-## 🏗️ Architecture
-
-### Directory Structure
-
-```
-rozenite-graphql-client-devtool/
-├── src/
-│   ├── react-native/          # React Native integration
-│   │   ├── adapters/          # Client adapters
-│   │   │   ├── apollo-adapter.ts
-│   │   │   ├── urql-adapter.ts
-│   │   │   └── types.ts
-│   │   └── useGraphqlClientDevtool.ts
-│   ├── ui/                    # DevTool UI components
-│   │   ├── components/        # Reusable UI components
-│   │   ├── tabs/             # Main tab components
-│   │   ├── store/            # State management
-│   │   └── App.tsx
-│   └── shared/               # Shared types and constants
-│       ├── types.ts
-│       ├── events.ts
-│       └── constants.ts
-├── package.json
-└── README.md
-```
-
-### Data Flow
-
-1. **React Native App** → Initializes `useGraphqlClientDevtool` hook
-2. **Hook** → Creates appropriate adapter based on client type
-3. **Adapter** → Monitors GraphQL client operations and cache
-4. **Plugin Bridge** → Sends events to DevTool UI
-5. **DevTool UI** → Displays operations, cache, and schema information
-6. **User** → Interacts with UI to inspect and debug
+ 
 
 ---
 
@@ -399,48 +314,28 @@ import type {
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-### Development Setup
-
-1. Clone the repository
-2. Install dependencies: `pnpm install`
-3. Make your changes
-4. Test your changes in the playground app
-5. Submit a pull request
-
 ---
 
 ## 📄 License
 
-MIT © [Your Name/Organization]
+MIT 
 
 ---
 
-## 🙏 Acknowledgments
-
-- Built on top of [Rozenite](https://github.com/yourusername/rozenite) - The React Native Developer Tools Platform
-- Powered by [@rozenite/plugin-bridge](https://www.npmjs.com/package/@rozenite/plugin-bridge)
-- UI components from [Radix UI](https://www.radix-ui.com/)
-- Styling with [Tailwind CSS](https://tailwindcss.com/)
-
+ 
 ---
 
 ## 📞 Support
 
-For issues, questions, or feature requests, please file an issue on [GitHub](https://github.com/yourusername/rozenite/issues).
+For issues, questions, or feature requests, please file an issue.
 
 ---
 
 ## 🔮 Roadmap
 
-- [ ] GraphQL subscriptions real-time visualization
-- [ ] Performance metrics and slow query detection
-- [ ] Cache diff viewer
-- [ ] Export operations as cURL/code snippets
-- [ ] Query response mocking
-- [ ] GraphQL fragment tracking
-- [ ] Advanced filtering with custom predicates
-- [ ] Integration with more GraphQL clients (Relay, AWS Amplify, etc.)
-
+- [ ] **URQL client support**  
+- [ ] **Relay Modern support**
+-
 ---
 
 **Made with ❤️ for React Native developers**

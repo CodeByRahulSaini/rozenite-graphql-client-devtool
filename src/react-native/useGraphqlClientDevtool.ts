@@ -35,12 +35,6 @@ interface UseGraphqlClientDevtoolConfig {
      * @default true
      */
     includeResponseData?: boolean;
-
-    /**
-     * Whether the devtool is enabled
-     * @default true
-     */
-    enabled?: boolean;
 }
 
 /**
@@ -78,7 +72,6 @@ export const useGraphqlClientDevtool = (config: UseGraphqlClientDevtoolConfig) =
         adapter: customAdapter,
         includeVariables = true,
         includeResponseData = true,
-        enabled = true,
     } = config;
 
     const pluginClient = useRozeniteDevToolsClient<GraphQLDevToolEventMap>({
@@ -90,7 +83,7 @@ export const useGraphqlClientDevtool = (config: UseGraphqlClientDevtoolConfig) =
 
     // Create the appropriate adapter based on client type
     useEffect(() => {
-        if (!enabled || !pluginClient) {
+        if (!pluginClient) {
             return;
         }
 
@@ -161,7 +154,6 @@ export const useGraphqlClientDevtool = (config: UseGraphqlClientDevtoolConfig) =
             adapterRef.current = null;
         };
     }, [
-        enabled,
         client,
         clientType,
         customAdapter,
@@ -172,7 +164,7 @@ export const useGraphqlClientDevtool = (config: UseGraphqlClientDevtoolConfig) =
 
     // Set up event listeners from panel
     useEffect(() => {
-        if (!enabled || !pluginClient || !adapterRef.current) {
+        if (!pluginClient || !adapterRef.current) {
             return;
         }
 
@@ -227,7 +219,7 @@ export const useGraphqlClientDevtool = (config: UseGraphqlClientDevtoolConfig) =
         return () => {
             subscriptions.forEach((subscription) => subscription.remove());
         };
-    }, [enabled, pluginClient]);
+    }, [pluginClient]);
 
     return pluginClient;
 };
