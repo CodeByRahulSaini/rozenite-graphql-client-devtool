@@ -186,7 +186,7 @@ export class ApolloClientAdapter implements GraphQLClientAdapter {
                     // First time seeing this query - start tracking
                     const uniqueOpId = `query-${this.operationCounter++}-${Date.now()}`;
                     const currentData = queryDetails.data || queryDetails.cachedData;
-                    
+
                     this.trackedQueries.set(queryId, {
                         status: currentStatus,
                         startTime: now,
@@ -203,7 +203,7 @@ export class ApolloClientAdapter implements GraphQLClientAdapter {
                 } else if (tracked.status !== currentStatus) {
                     // Status changed - this is a state transition we should track
                     const currentData = queryDetails.data || queryDetails.cachedData;
-                    
+
                     if (tracked.status === 'loading' && currentStatus !== 'loading') {
                         // Loading → Success/Error: Emit completed operation with duration
                         const duration = now - tracked.startTime;
@@ -232,7 +232,7 @@ export class ApolloClientAdapter implements GraphQLClientAdapter {
                     const uniqueOpId = `query-${this.operationCounter++}-${Date.now()}`;
                     const duration = 50; // Estimate for cache/instant updates
                     const currentData = queryDetails.data || queryDetails.cachedData;
-                    
+
                     this.trackedQueries.set(queryId, {
                         status: currentStatus,
                         startTime: now,
@@ -451,10 +451,9 @@ export class ApolloClientAdapter implements GraphQLClientAdapter {
             status = 'success';
         }
 
-        // Extract operation name from document
-        const operationName = document.definitions?.[0]?.kind === 'OperationDefinition'
-            ? (document.definitions[0] as any).name?.value || 'Unnamed Query'
-            : 'Unnamed Query';
+        // Extract operation name from document (search all definitions to handle fragments)
+        const operationDef = document.definitions?.find((def: any) => def.kind === 'OperationDefinition');
+        const operationName = operationDef?.name?.value || 'Unnamed Query';
 
         return {
             id: operationId,
@@ -480,10 +479,9 @@ export class ApolloClientAdapter implements GraphQLClientAdapter {
     private convertMutationToOperation(mutationDetails: PrivateMutationStoreValue, index: number): GraphQLOperation {
         const { mutation, variables, loading, error } = mutationDetails;
 
-        // Extract operation name from document
-        const operationName = mutation.definitions?.[0]?.kind === 'OperationDefinition'
-            ? (mutation.definitions[0] as any).name?.value || 'Unnamed Mutation'
-            : 'Unnamed Mutation';
+        // Extract operation name from document (search all definitions to handle fragments)
+        const operationDef = mutation.definitions?.find((def: any) => def.kind === 'OperationDefinition');
+        const operationName = operationDef?.name?.value || 'Unnamed Mutation';
 
         // Generate unique ID for each mutation execution
         const uniqueId = `mutation-${this.operationCounter++}-${Date.now()}`;
